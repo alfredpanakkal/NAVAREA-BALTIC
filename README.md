@@ -1,117 +1,156 @@
-# NAVAREA I: Deterministic Scraper & Parser Pipeline
+# ⚓ HELM SCRAPER — NAVAREA Baltic Sub-Area Ingestion Engine
 
-[![NAVAREA Scraper Pipeline](https://github.com/alfredpanakkal/NAVAREA-1/actions/workflows/navarea-test.yml/badge.svg)](https://github.com/alfredpanakkal/NAVAREA-1/actions/workflows/navarea-test.yml)
-[![Production Portal](https://img.shields.io/badge/Production%20Portal-Helm.Warning%20Data%20Bank-0070f3?style=flat&logo=vercel)](https://helmwarning.vercel.app/)
-[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
-[![Database](https://img.shields.io/badge/Database-Supabase%20PostgreSQL-3ECF8E?logo=supabase)](https://supabase.com)
+[![Production Portal](https://img.shields.io/badge/Production%20Portal-Helm.Warning%20Data%20Bank-0070f3?style=for-the-badge&logo=vercel)](https://helmwarning.vercel.app/)
+[![Baltic Pipeline](https://img.shields.io/github/actions/workflow/status/alfredpanakkal/NAVAREA-1/baltic-sync.yml?branch=main&label=Baltic%20Pipeline&style=for-the-badge&logo=githubactions)](https://github.com/alfredpanakkal/NAVAREA-1/actions/workflows/baltic-sync.yml)
+[![Python Version](https://img.shields.io/badge/Python-3.11%2B-blue?style=for-the-badge&logo=python)](https://www.python.org/)
+[![Database](https://img.shields.io/badge/Database-Supabase%20PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase)](https://supabase.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-> **Official Ingestion Pipeline for [Helm.Warning — NAVAREA Data Bank](https://helmwarning.vercel.app/)**
-
-This repository hosts a Python-based autonomous data pipeline designed to ingest, deterministically parse, normalize, and synchronize active **NAVAREA I** radio navigational warnings from the United Kingdom Hydrographic Office (UKHO) directly into the **Helm.Warning** maritime database architecture.
-
-It utilizes the adaptive **[Scrapling](https://github.com/D4Vinci/Scrapling)** framework for robust anti-bot bypass, stealth session handling, and DOM extraction.
+> **Automated radio navigational warning scraper, deterministic parser, coordinate normalizer, and Supabase synchronizer for the Baltic Sea and Swedish coastal waters, powering [Helm.Warning](https://helmwarning.vercel.app/).**
 
 ---
 
-## 🌐 Production Platform
-- **Live Data Bank & Map Portal:** [https://helmwarning.vercel.app/](https://helmwarning.vercel.app/)
-- **Authority / Source:** United Kingdom Hydrographic Office (UKHO) / Admiralty MSI
-- **Coverage Zone:** NAVAREA I (North Sea, English Channel, NE Atlantic)
+## 🌊 Overview
+
+The Baltic Sea is designated as a specialized sub-area under NAVAREA I, coordinated by the **Swedish Maritime Administration (Sjöfartsverket / SMA)**.
+
+This engine harvests official maritime safety broadcasts from [Sjöfartsverket VHF Navigational Warnings](https://navvarn.sjofartsverket.se/en/Navigationsvarningar/VHF), normalizes navigational positions (including polygons, multi-point hazard bounds, and variable decimal precision) into WGS84 coordinates, infers issued years, classifies maritime hazard semantics, and persists data directly into the Helm.Warning Supabase data bank.
 
 ---
 
-## 🏗️ Architectural Alignment
+## 🗺️ NAVAREA Baltic Coverage
 
-This pipeline is fully compliant with the **Helm.Warning 4-Stage Architecture**, adhering to the required 6 Parameter Domains (Identity, Temporal, Spatial, Hazard, Evidence, and Governance).
+Broadcasts originate across 15 sub-regions:
+- **Skagerrak**
+- **Kattegat**
+- **The Sound**
+- **Lake Vänern and Trollhätte Canal**
+- **Western Baltic**
+- **Southern Baltic**
+- **South-eastern Baltic**
+- **Central Baltic**
+- **Lake Mälaren and Södertälje Canal**
+- **Northern Baltic**
+- **Sea of Åland and Archipelago Sea**
+- **Sea of Bothnia**
+- **The Quark**
+- **Bay of Bothnia**
+- **Other lakes and canals**
+
+---
+
+## 🏗️ Architecture Pipeline
 
 ```
-[ Authoritative Hydrographic Feeds: UKHO Admiralty MSI ]
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│             STAGE 1 & 2: SCRAPE & VERIFICATION              │
-│  navarea_scraper.py (Session Token + In-Force Selection)    │
-└──────────────────────────┬──────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│          STAGE 2: MULTI-PASS DETERMINISTIC PARSER           │
-│  navarea_parser.py (WGS84 Coordinates, GeoJSON, Semantics)  │
-└──────────────────────────┬──────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│     STAGE 3 & 4: DUAL-ROUTE SUPABASE SYNCHRONIZATION        │
-│  supabase_sync.py                                           │
-│  ├── public.raw_messages (Immutable Audit Log)              │
-│  └── public.nav_warnings (Master In-Force Spatial Records)  │
-└─────────────────────────────────────────────────────────────┘
+                 [ Sjöfartsverket Nav Warnings Portal ]
+            (https://navvarn.sjofartsverket.se/en/Navigationsvarningar/VHF)
+                                   │
+                                   ▼
+ ┌─────────────────────────────────────────────────────────────────┐
+ │               STAGE 1: EVIDENCE ACQUISITION                     │
+ │  baltic_scraper.py                                              │
+ │  • Public SSR HTML extraction (no CSRF overhead)                │
+ │  • Deduplicates regional broadcasts across multiple sub-areas   │
+ │  • Emits verbatim text ledger (navarea_baltic_warnings.txt)     │
+ └────────────────────────────────┬────────────────────────────────┘
+                                  │
+                                  ▼
+ ┌─────────────────────────────────────────────────────────────────┐
+ │               STAGE 2: DETERMINISTIC REGEX PARSER               │
+ │  baltic_parser.py                                               │
+ │  • Variable precision coordinate regex (\d{1,3} decimals)       │
+ │  • Centroid & GeoJSON bounding box polygon computation          │
+ │  • Issued year temporal inference (e.g., 168/26 ➔ 2026)         │
+ │  • Hazard semantic categorization (military, aton, subsea, etc.)│
+ │  • SHA-256 cryptographic bulletin auditing                      │
+ │  • Emits structured payload (parsed_warnings.json)              │
+ └────────────────────────────────┬────────────────────────────────┘
+                                  │
+                                  ▼
+ ┌─────────────────────────────────────────────────────────────────┐
+ │               STAGE 3: DUAL-ROUTE DATABASE SYNC                 │
+ │  supabase_sync.py                                               │
+ │  ├── public.raw_messages  ➔ Immutable audit ledger (insert)     │
+ │  └── public.nav_warnings  ➔ Active master registry (upsert)     │
+ │                             (source_id: 'sma-baltic-subarea',   │
+ │                              navarea:   'Baltic')               │
+ └────────────────────────────────┬────────────────────────────────┘
+                                  │
+                                  ▼
+ ┌─────────────────────────────────────────────────────────────────┐
+ │               STAGE 4: MARITIME PRESENTATION                    │
+ │  Helm.Warning Web Portal (Next.js / MapLibre / Vercel)          │
+ │  https://helmwarning.vercel.app/                                │
+ └─────────────────────────────────────────────────────────────────┘
 ```
-
-### Pipeline Components
-
-1. **The Evidence Locker (`navarea_scraper.py`)**
-   - Fetches the active warning repository (`https://msi.admiralty.co.uk/RadioNavigationalWarnings`).
-   - Resolves CSRF verification tokens dynamically.
-   - Submits the form selection specifically for all in-force NAVAREA I warnings.
-   - Emits an untouched, verbatim `navarea_1_warnings.txt` payload.
-
-2. **The Multi-Pass Deterministic Parser (`navarea_parser.py`)**
-   - **Coordinate Normalization:** Extracts text-based DMS / DM coordinates (e.g., `52-07.7N 003-56.4E`) and converts them into decimal degrees (`latitude`, `longitude`).
-   - **GeoJSON Generation:** Automatically creates WGS 84 `spatial` features (Point, LineString).
-   - **Hazard Semantic Classification:** Tags warnings using maritime keywords (`aton`, `military`, `subsea`, `drifting`, `offshore`).
-   - **Affected Charts:** Captures referenced Admiralty/INT charts (e.g., `INT 102`, `CHART GB 4102`).
-   - **Cryptographic Traceability:** Generates `checksum_sha256` hashes for every bulletin block.
-   - Emits structured `parsed_warnings.json`.
-
-3. **Dual-Route Database Router (`supabase_sync.py`)**
-   - Consumes the normalized JSON payload.
-   - Interacts with Supabase using `supabase-py`.
-   - Idempotently upserts records into `public.raw_messages` and `public.nav_warnings` keyed on `(warning_id, source_id)`.
 
 ---
 
-## 🚀 Usage & Execution
+## 💾 Database Integration Contract
 
-### 1. Local Setup
-Clone the repository and install the dependencies:
+Fully aligned with the Helm.Warning data bank specification:
+- **`source_id`**: `'sma-baltic-subarea'` (matches [`sourcesRegistry.ts`](../navwaarning%20sep2026/src/data/sourcesRegistry.ts))
+- **`navarea`**: `'Baltic'` (matches [`types.ts`](../navwaarning%20sep2026/src/types.ts))
+
+### Composite Uniqueness:
+- `public.raw_messages`: `(warning_id, source_id, checksum_sha256)`
+- `public.nav_warnings`: `(warning_id, source_id)`
+
+---
+
+## 🏷️ Hazard Classification
+
+| Category | Keywords & Terminology | Sample Baltic Findings |
+| :--- | :--- | :--- |
+| `military` | `DETONATIONS`, `FIRING`, `GUNNERY`, `ARMED FORCES`, `NAVAL EXERCISES` | Lysekil detonations (`168/26`), Central Baltic exercises (`029/26`) |
+| `aton` | `LIGHT`, `LIGHTS`, `BUOY`, `RACON`, `BEACON`, `UNLIT`, `EXTINGUISHED` | Donsö Svartskär unlit (`156/26`), Dalbolandet lights (`159/26`) |
+| `subsea` | `PIPELINE`, `CABLE`, `SEISMIC`, `DREDGING`, `ANCHOR`, `CHAIN LOST` | Kärsön pipeline (`160/26`), Luleå lost anchor & chain (`165/26`) |
+| `electronic` | `GNSS`, `DGPS`, `AIS INTERFERENCE`, `RADAR INTERFERENCE`, `JAMMING` | Baltic-wide GNSS/AIS interference alert (`026/25`) |
+| `drifting` | `DRIFTING`, `DERELICT`, `MINE`, `CONTAINER` | Adrift navigation hazards |
+| `general` | *(Fallback)* | General safety and advisory bulletins |
+
+---
+
+## ⚙️ Quickstart & Local Execution
+
+### 1. Installation
 ```bash
-git clone https://github.com/alfredpanakkal/NAVAREA-1.git
-cd NAVAREA-1
-
-pip install -e .[all]
-pip install requests supabase
+pip install -r requirements.txt
 ```
 
-### 2. Manual Pipeline Run
-Run the pipeline stages sequentially:
+### 2. Environment Variables (Optional for Supabase Sync)
 ```bash
-# Step 1: Scrape verbatim warnings
-python navarea_scraper.py
+# PowerShell:
+$env:SUPABASE_URL = "https://your-project.supabase.co"
+$env:SUPABASE_KEY = "your-supabase-key"
 
-# Step 2: Parse, normalize coordinates & generate GeoJSON
-python navarea_parser.py
-
-# Step 3: Upsert into Supabase (requires environment variables)
+# Bash:
 export SUPABASE_URL="https://your-project.supabase.co"
-export SUPABASE_KEY="your-anon-or-service-key"
-python supabase_sync.py
+export SUPABASE_KEY="your-supabase-key"
 ```
 
-### 3. Automated Cloud Pipeline (GitHub Actions)
-Continuous integration and recurring synchronization are handled via `.github/workflows/navarea-test.yml`:
-- **Triggers:** Push to `main`, scheduled cron intervals (every 6 hours), or manual trigger (`workflow_dispatch`).
-- **Secrets Required:**
-  - `SUPABASE_URL`
-  - `SUPABASE_KEY`
-- Runs in a clean Ubuntu runner, verifies scraping and parsing integrity, and publishes live updates to [Helm.Warning](https://helmwarning.vercel.app/).
+### 3. Run Pipeline
+```bash
+# Execute end-to-end pipeline in one command:
+python run_pipeline.py
+
+# Or step-by-step:
+python baltic_scraper.py   # Harvests navarea_baltic_warnings.txt
+python baltic_parser.py    # Normalizes & emits parsed_warnings.json
+python supabase_sync.py    # Syncs to Supabase tables
+```
+
+### 4. Run Unit Test Suite
+```bash
+python -m unittest tests/test_baltic.py
+```
 
 ---
 
-## 📜 Acknowledgments & Credits
+## 🤖 Cloud Automation (GitHub Actions)
 
-**Scrapling Framework**  
-This repository originated as a fork of [Scrapling](https://github.com/D4Vinci/Scrapling), an adaptive web scraping framework. All credit for the underlying scraping framework, fetcher engines, and DOM selectors goes to the original creator **Karim Shoair (D4Vinci)** and the contributors to the Scrapling project.
-
-* [Scrapling GitHub Repository](https://github.com/D4Vinci/Scrapling)
-* [Scrapling Documentation](https://scrapling.readthedocs.io)
+Configured via [`.github/workflows/baltic-sync.yml`](./.github/workflows/baltic-sync.yml):
+- **Cron Frequency:** Every 6 hours (`0 */6 * * *`).
+- **Manual Trigger:** Supported via `workflow_dispatch`.
+- **Secrets Configured:** `SUPABASE_URL` and `SUPABASE_KEY`.
+- **Artifacts:** Publishes verified `navarea_baltic_warnings.txt` and `parsed_warnings.json` on each run.

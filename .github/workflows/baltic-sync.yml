@@ -1,0 +1,73 @@
+name: NAVAREA Baltic Ingestion Pipeline
+
+on:
+  schedule:
+    - cron: '0 */6 * * *' # Automatically runs every 6 hours
+  push:
+    branches:
+      - main
+    paths:
+      - 'baltic_scraper.py'
+      - 'baltic_parser.py'
+      - 'supabase_sync.py'
+      - 'run_pipeline.py'
+      - '.github/workflows/baltic-sync.yml'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch: # Allows manual trigger from the GitHub UI
+
+jobs:
+  ingest-baltic-warnings:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Test Suite
+        run: |
+          python -m unittest tests/test_baltic.py
+
+      - name: Run Ingestion Pipeline
+        run: |
+          python baltic_scraper.py
+          python baltic_parser.py
+
+      - name: Verify Scraper & Parser Output
+        run: |
+          if [ ! -f navarea_baltic_warnings.txt ]; then
+            echo "Scraper failed: navarea_baltic_warnings.txt not found!"
+            exit 1
+          fi
+          if [ ! -f parsed_warnings.json ]; then
+            echo "Parser failed: parsed_warnings.json not found!"
+            exit 1
+          fi
+          echo "Output files verified successfully."
+
+      - name: Sync to Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: |
+          python supabase_sync.py
+
+      - name: Upload Output Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: baltic-warnings-data
+          path: |
+            navarea_baltic_warnings.txt
+            parsed_warnings.json
+          retention-days: 7
