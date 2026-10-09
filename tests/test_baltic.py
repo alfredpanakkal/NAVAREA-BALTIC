@@ -158,5 +158,58 @@ PSN 64-39.71N 021-16.82E."""
         self.assertAlmostEqual(nav_warn["latitude"], 64.661833, places=4)
         self.assertAlmostEqual(nav_warn["longitude"], 21.280333, places=4)
 
+from supabase_sync import compute_differential
+
+class TestDifferentialSync(unittest.TestCase):
+
+    def setUp(self):
+        self.scraped_warnings = [
+            {"warning_id": "SWEDISH 168/26", "title": "Lysekil"},
+            {"warning_id": "SWEDISH 167/26", "title": "Stora Polsan"},
+            {"warning_id": "SWEDISH 999/26", "title": "Brand New Warning"}
+        ]
+        self.scraped_messages = [
+            {"warning_id": "SWEDISH 168/26", "checksum_sha256": "hash_168_unchanged"},
+            {"warning_id": "SWEDISH 167/26", "checksum_sha256": "hash_167_new_revision"},
+            {"warning_id": "SWEDISH 999/26", "checksum_sha256": "hash_999_brand_new"}
+        ]
+        self.existing_warnings = {
+            "SWEDISH 168/26": {"warning_id": "SWEDISH 168/26", "status": "active"},
+            "SWEDISH 167/26": {"warning_id": "SWEDISH 167/26", "status": "active"},
+            "SWEDISH 100/26": {"warning_id": "SWEDISH 100/26", "status": "active"} # dropped from harvest
+        }
+        self.existing_checksums = {
+            ("SWEDISH 168/26", "hash_168_unchanged"),
+            ("SWEDISH 167/26", "hash_167_old_version"),
+            ("SWEDISH 100/26", "hash_100_old")
+        }
+
+    def test_differential_bucketing(self):
+        diff = compute_differential(
+            self.scraped_warnings,
+            self.scraped_messages,
+            self.existing_warnings,
+            self.existing_checksums
+        )
+
+        # 168 should be skipped (exact match)
+        self.assertIn("SWEDISH 168/26", diff["skip"])
+        self.assertEqual(len(diff["skip"]), 1)
+
+        # 999 should be new (unseen ID)
+        new_ids = [w["warning_id"] for w, m in diff["new"]]
+        self.assertIn("SWEDISH 999/26", new_ids)
+        self.assertEqual(len(diff["new"]), 1)
+
+        # 167 should be updated (checksum changed)
+        update_ids = [w["warning_id"] for w, m in diff["update"]]
+        self.assertIn("SWEDISH 167/26", update_ids)
+        self.assertEqual(len(diff["update"]), 1)
+
+        # 100 was active in DB but missing from scrape -> cancelled
+        self.assertIn("SWEDISH 100/26", diff["cancel"])
+        self.assertEqual(len(diff["cancel"]), 1)
+
 if __name__ == "__main__":
     unittest.main()
+

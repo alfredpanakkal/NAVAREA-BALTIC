@@ -68,12 +68,14 @@ Broadcasts originate across 15 sub-regions:
                                   │
                                   ▼
  ┌─────────────────────────────────────────────────────────────────┐
- │               STAGE 3: DUAL-ROUTE DATABASE SYNC                 │
+ │               STAGE 3: SMART DIFFERENTIAL SYNC                  │
  │  supabase_sync.py                                               │
- │  ├── public.raw_messages  ➔ Immutable audit ledger (insert)     │
- │  └── public.nav_warnings  ➔ Active master registry (upsert)     │
- │                             (source_id: 'sma-baltic-subarea',   │
- │                              navarea:   'Baltic')               │
+ │  • Pre-sync Supabase state inspection                           │
+ │  • SKIPS unchanged bulletins (zero redundant DB writes)         │
+ │  • INSERTS new bulletins into public.raw_messages               │
+ │  • UPSERTS new/revised bulletins into public.nav_warnings       │
+ │  • MARKS status='cancelled' for expired/dropped bulletins       │
+ │    (source_id: 'sma-baltic-subarea', navarea: 'Baltic')         │
  └────────────────────────────────┬────────────────────────────────┘
                                   │
                                   ▼

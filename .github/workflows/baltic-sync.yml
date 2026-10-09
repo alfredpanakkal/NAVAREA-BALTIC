@@ -17,6 +17,13 @@ on:
       - main
   workflow_dispatch: # Allows manual trigger from the GitHub UI
 
+concurrency:
+  group: baltic-sync-engine
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
 jobs:
   ingest-baltic-warnings:
     runs-on: ubuntu-latest
@@ -29,39 +36,56 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Test Suite
+      - name: Run Unit Test Suite
         run: |
           python -m unittest tests/test_baltic.py
 
-      - name: Run Ingestion Pipeline
+      - name: Harvest Bulletins (Stage 1 Scraper)
         run: |
           python baltic_scraper.py
+
+      - name: Normalize & Classify (Stage 2 Parser)
+        run: |
           python baltic_parser.py
 
-      - name: Verify Scraper & Parser Output
+      - name: Verify Scraper & Parser Output Files
         run: |
           if [ ! -f navarea_baltic_warnings.txt ]; then
-            echo "Scraper failed: navarea_baltic_warnings.txt not found!"
+            echo "Scraper error: navarea_baltic_warnings.txt not generated!"
             exit 1
           fi
           if [ ! -f parsed_warnings.json ]; then
-            echo "Parser failed: parsed_warnings.json not found!"
+            echo "Parser error: parsed_warnings.json not generated!"
             exit 1
           fi
           echo "Output files verified successfully."
 
-      - name: Sync to Supabase
+      - name: Differential Sync to Supabase (Stage 3 Sync)
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: |
           python supabase_sync.py
+
+      - name: Commit & Push Updated Data Files (If Changed)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add navarea_baltic_warnings.txt parsed_warnings.json
+          if ! git diff --staged --quiet; then
+            git commit -m "chore(data): automated 6h bulletin harvest [skip ci]"
+            git push
+            echo "Committed and pushed fresh bulletin harvest."
+          else
+            echo "No data changes detected. Skipping git push."
+          fi
 
       - name: Upload Output Artifacts
         uses: actions/upload-artifact@v4

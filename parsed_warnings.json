@@ -5,7 +5,7 @@
       "source_id": "sma-baltic-subarea",
       "subject_header": "SWEDISH NAV WARN 168/26 [Skagerrak]",
       "full_raw_text": "080056 UTC OCT\nSKAGERRAK. LYSEKIL. BONDEN\nTHE SWEDISH ARMED FORCES WILL PERFORM DETONATIONS\n09 OCT 0600 LT – 14 OCT 2000 LT\nPSN:\n58-10.2N 011-13.3E\n58-13.3N 011-13.3E\n58-13.3N 011-17.4E\n58-10.2N 011-13.3E\n500 MTR CLEARANCE FROM THE AREA IS REQUESTED.",
-      "received_timestamp": "2026-10-09T09:25:09.417528+00:00",
+      "received_timestamp": "2026-10-09T09:59:49.601694+00:00",
       "checksum_sha256": "49b3812147384012673133406620001d89d17a39eb554bac5f17a52188f1c5dd"
     },
     {
@@ -13,7 +13,7 @@
       "source_id": "sma-baltic-subarea",
       "subject_header": "SWEDISH NAV WARN 167/26 [Kattegat]",
       "full_raw_text": "080035 UTC OCT\nKATTEGAT. MARSTRAND. STORA PÖLSAN.\nTHE SWEDISH ARMED FORCES WILL PERFORM DETONATIONS.\n09 OCT 0600 LT - 14 OCT 2000 LT.\n1 M CLEARANCE FROM THE AREA IS REQUESTED.\nPSN: 57-47.0N 011-27.9E",
-      "received_timestamp": "2026-10-09T09:25:09.417528+00:00",
+      "received_timestamp": "2026-10-09T09:59:49.601694+00:00",
       "checksum_sha256": "e8ff5ac78e6c7ddc1da923b8d107faf1f90a71b91b89357a6b8573150738841f"
     },
     {
@@ -21,7 +21,7 @@
       "source_id": "sma-baltic-subarea",
       "subject_header": "SWEDISH NAV WARN 166/26 [Kattegat]",
       "full_raw_text": "070800 UTC OCT\nKATTEGAT. FALKENBERG HARBOUR ENTRANCE.\nDREDGING IN OPERATION. SPAR BUOYS MIGHT HAVE BEEN MOVED.  \nPSN 56-53.0N 012-28.0E\nGREATE CAUTION ADVISED",
-      "received_timestamp": "2026-10-09T09:25:09.417528+00:00",
+      "received_timestamp": "2026-10-09T09:59:49.601694+00:00",
       "checksum_sha256": "8541cc1faedf7ab0faa16afdcec613a7d25b86d59a9e8582c3b51aa002ee0a82"
     },
     {
@@ -29,7 +29,7 @@
       "source_id": "sma-baltic-subarea",
       "subject_header": "SWEDISH NAV WARN 156/26 [Kattegat]",
       "full_raw_text": "300051 UTC SEP\nKATTEGAT. STYRSÖ. DONSÖ\nLIGHT 'DONSÖ SVARTSKÄR' IS UNLIT.\nPSN 57-35.15N 011-43.33E.",
-      "received_timestamp": "2026-10-09T09:25:09.417528+00:00",
+      "received_timestamp": "2026-10-09T09:59:49.601694+00:00",
       "checksum_sha256": "b2cd02742437237fea034f220bf129c41b8e7717c8db7b42804c288af03fc3ac"
     },
     {
@@ -37,7 +37,7 @@
       "source_id": "sma-baltic-subarea",
       "subject_header": "SWEDISH NAV WARN 159/26 [Lake Vänern and Trollhätte Canal]",
       "full_raw_text": "010929 UTC OCT\nLAKE VÄNERN \nTHE LEADING LIGHTS ON DALBOLANDET ARE EXTINGUISHED FOR MAINTENANCE.\nAPPROX. PSN 58-23.6N 012-18.3E.",
-      "received_timestamp": "2026-10-09T09:25:09.417528+00:00",
+      "received_timestamp": "2026-10-09T09:59:49.601694+00:00",
       "checksum_sha256": "66ab645c22733a55928060a53586a1ef8b5cf432bf84678822014d13ce1566a8"
     },
     {
@@ -45,7 +45,7 @@
       "source_id": "sma-baltic-subarea",
       "subject_header": "BALTIC SEA NAV WARN 026/25 [Western Baltic, Southern Baltic, South-eastern Baltic, Central Baltic, Northern Baltic, Sea of Åland and Archipelago Sea]",
       "full_raw_text": "021100 UTC JUL\nSOUTHERN, SOUTHEASTERN, CENTRAL AND NORTHERN BALTIC, GULF OF FINLAND, GULF OF RIGA AND SEA OF AALAND.\nGNSS, AIS, RADAR AND DGPS INTERFERENCE OBSERVED IN AREA.\nMARINERS ADVISED TO EXERCISE CAUTION\nAND BE PREPARED FOR NAVIGATION IMPACTS.",
-      "received_timestamp": "2026-10-09T09:25:09.417528+00:00",
+      "received_timestamp": "2026-10-09T09:59:49.601694+00:00",
       "checksum_sha256": "75e456951955c6bcb3dffabd34359affc2bb6f3ece325aecec0f4ad9b82ba546"
     },
     {
@@ -53,7 +53,7 @@
       "source_id": "sma-baltic-subarea",
       "subject_header": "BALTIC SEA NAV WARN 029/26 [Central Baltic]",
       "full_raw_text": "280548 UTC SEP\nNAVAL EXERCISES (WITHOUT FIRINGS) 022100 TO 102100 OCT UTC \nIN AREA DANGEROUS TO NAVIGATION BOUNDED BY\n57-37.5N 020-05.6E 57-27.1N 020-35.5E\n56-54.0N 019-56.1E 57-04.9N 019-25.9E",
-      "received_timestamp": "2026-10-09T09:25:09.417528+00:00",
+      "received_timestamp": "2026-10-09T09:59:49.601694+00:00",
       "checksum_sha256": "f19231f0a38a3ce6a94fab665af2df66b91d618ec7402ecc6b6a2a3dff1924c7"
     },
     {
@@ -61,7 +61,7 @@
       "source_id": "sma-baltic-subarea",
       "subject_header": "SWEDISH NAV WARN 151/26 [Central Baltic]",
       "full_raw_text": "141908 UTC SEP\nCENTRAL BALTIC. GOTLAND.\nLIGHT 'STORA KARLSÖ' UNLIT.\nPSN 57-17.4N 017-57.5E.",
-      "received_timestamp": "2026-10-09T09:25:09.417528+00:00",
+      "received_timestamp": "2026-10-09T09:59:49.601694+00:00",
       "checksum_sha256": "c5ecdf654e4a592650daf761cd8aa94f9c3596fc6cec23217d43410042ce943e"
     },
     {
@@ -69,7 +69,7 @@
       "source_id": "sma-baltic-subarea",
       "subject_header": "SWEDISH NAV WARN 160/26 [Lake Mälaren and Södertälje Canal]",
       "full_raw_text": "021834 UTC OCT\nLAKE MÄLAREN AND SÖDERTÄLJE CANAL. KÄRSÖN.\nUNMARKED PIPELINE EXIST CLOSE UNDER THE WATER SURFACE \nIN VICINITY OF PSN 59-19.6N 017-54.4E\nAT 021834 UTC OCT.\nCAUTION ADVISED.",
-      "received_timestamp": "2026-10-09T09:25:09.417528+00:00",
+      "received_timestamp": "2026-10-09T09:59:49.604209+00:00",
       "checksum_sha256": "8f34f6f6901b46ecd79a335c18b37974583505b5f67fd08e430b5e4a37b30834"
     },
     {
@@ -77,7 +77,7 @@
       "source_id": "sma-baltic-subarea",
       "subject_header": "SWEDISH NAV WARN 152/26 [Northern Baltic]",
       "full_raw_text": "150459 UTC SEP\nNORTHERN BALTIC. STOCKHOLM ARCHIPELAGO.\nLIGHT 'IKORN' UNLIT.\nPSN 59-29.3N 018-29.5E.",
-      "received_timestamp": "2026-10-09T09:25:09.417528+00:00",
+      "received_timestamp": "2026-10-09T09:59:49.604209+00:00",
       "checksum_sha256": "f9249e9732db1e04c0d20811b48f4312dd0223b6d97001d0081b66d97c91e78a"
     },
     {
@@ -85,7 +85,7 @@
       "source_id": "sma-baltic-subarea",
       "subject_header": "SWEDISH NAV WARN 165/26 [Bay of Bothnia]",
       "full_raw_text": "070521 UTC OCT\nBAY OF BOTHNIA. LULEÅ. LARSGRUNDET. SÖRBRÄNDÖFJÄRDEN.\nANCHOR AND 280 MERTERS CHAIN LOST.\nPSN 65-27.1N 022-30.0E",
-      "received_timestamp": "2026-10-09T09:25:09.424481+00:00",
+      "received_timestamp": "2026-10-09T09:59:49.604209+00:00",
       "checksum_sha256": "0c9152d30bbccd20633bbf3123ab2792455a19d8e7b12ab2b08e2fa0a3fc63a3"
     },
     {
@@ -93,7 +93,7 @@
       "source_id": "sma-baltic-subarea",
       "subject_header": "SWEDISH NAV WARN 155/26 [Bay of Bothnia]",
       "full_raw_text": "280753 UTC SEP\nBAY OF BOTHNIA. SKELLEFTEHAMN. ARMBÅGEN - RÖNNSKÄR\nLIGHT 'KOPPARUDDEN'  FL WRG 3S 9M. UNLIT. \nPSN 64-39.71N 021-16.82E.",
-      "received_timestamp": "2026-10-09T09:25:09.424481+00:00",
+      "received_timestamp": "2026-10-09T09:59:49.604209+00:00",
       "checksum_sha256": "9858d00d085ffd709ee20786bf8a9e31d09d6d83cac3fd35150bcb8184de3b7e"
     }
   ],
