@@ -151,8 +151,17 @@ python -m unittest tests/test_baltic.py
 
 ## 🤖 Cloud Automation (GitHub Actions)
 
-Configured via [`.github/workflows/baltic-sync.yml`](./.github/workflows/baltic-sync.yml):
+Configured via [`.github/workflows/baltic-sync.yml`](./.github/workflows/baltic-sync.yml).
+
+### Architecture Decision: No Git Commits in CI
+Initially, the pipeline committed the scraped and parsed JSON/TXT files back to the repository. This is an anti-pattern that causes `git push` race conditions (e.g., `! [rejected] main -> main (fetch first)`) during concurrent workflow runs or when users push manual changes, and it pollutes the repository history.
+
+Instead, the workflow has been upgraded to a **State-Free Sync Engine**:
+1. **GitHub Actions Artifacts:** Temporary output files (`navarea_baltic_warnings.txt` and `parsed_warnings.json`) are uploaded directly as pipeline artifacts.
+2. **Supabase Differential Sync:** `supabase_sync.py` connects directly to the production database, diffs the current state, and executes surgical inserts/upserts, making Git entirely unnecessary for data persistence.
+
+### CI Configuration
 - **Cron Frequency:** Every 6 hours (`0 */6 * * *`).
 - **Manual Trigger:** Supported via `workflow_dispatch`.
-- **Secrets Configured:** `SUPABASE_URL` and `SUPABASE_KEY`.
-- **Artifacts:** Publishes verified `navarea_baltic_warnings.txt` and `parsed_warnings.json` on each run.
+- **Required Secrets:** `SUPABASE_URL` and `SUPABASE_KEY` must be configured in GitHub Secrets.
+- **Outputs:** Safely synchronizes data to Supabase and publishes verified JSON/TXT as run artifacts, keeping the Git `main` branch pristine.
