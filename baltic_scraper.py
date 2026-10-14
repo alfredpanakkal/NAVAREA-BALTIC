@@ -6,13 +6,18 @@ https://navvarn.sjofartsverket.se/en/Navigationsvarningar/VHF
 
 Supports BOTH the legacy page structure (div#warnings_by_area with div.nav-area-div
 sections) and the current structure (area headings followed directly by <p> blocks).
+
+Uses curl_cffi with a real Chrome TLS fingerprint, since plain python-requests
+is blocked from datacenter IPs (GitHub Actions runners). Do NOT override the
+User-Agent header with impersonate="chrome" — the TLS/JA3 fingerprint, HTTP/2
+settings and sec-ch-ua headers must stay consistent to avoid WAF blocks.
 """
 
 import sys
 import re
 import html
-import requests
 import urllib3
+from curl_cffi import requests as cffi_requests
 from bs4 import BeautifulSoup
 
 # Ensure UTF-8 output on Windows terminals
@@ -26,19 +31,17 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 URL = "https://navvarn.sjofartsverket.se/en/Navigationsvarningar/VHF"
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    "Accept-Language": "en-US,en;q=0.9,sv;q=0.8"
-}
 
 def clean_text(text: str) -> str:
     """Normalize text and whitespace."""
     if not text:
         return ""
     text = html.unescape(text)
-    text = text.replace('\r\n', '\n').replace('\r', '\n')
-    text = text.replace('\xa0', ' ')
+    text = text.replace('
+', '
+').replace('', '
+')
+    text = text.replace(' ', ' ')
     return text.strip()
 
 def _extract_area_name(el) -> str:
@@ -93,13 +96,20 @@ def scrape_baltic_warnings(output_filename="navarea_baltic_warnings.txt"):
     print(f"Fetching live bulletins from {URL}...")
 
     try:
-        response = requests.get(URL, headers=HEADERS, timeout=30, verify=False)
+        response = cffi_requests.get(
+            URL,
+            impersonate="chrome",
+            timeout=30,
+            verify=False
+        )
         response.raise_for_status()
-    except requests.exceptions.RequestException as e:
+    except Exception as e:
         print(f"❌ Network error while fetching {URL}: {e}")
         sys.exit(1)
 
-    soup = BeautifulSoup(response.text, "html.parser")
+    # Page is UTF-8; decode explicitly from raw bytes.
+    page_text = response.content.decode("utf-8", errors="replace")
+    soup = BeautifulSoup(page_text, "html.parser")
     collected_warnings = {}
 
     # ---- Strategy 1: legacy DOM (div#warnings_by_area > div.nav-area-div) ----

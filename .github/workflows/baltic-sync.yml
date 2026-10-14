@@ -11,6 +11,7 @@ on:
       - 'baltic_parser.py'
       - 'supabase_sync.py'
       - 'run_pipeline.py'
+      - 'requirements.txt'
       - '.github/workflows/baltic-sync.yml'
   pull_request:
     branches:
@@ -76,9 +77,11 @@ jobs:
 
       - name: Upload Output Artifacts
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: baltic-warnings-data
           path: |
             navarea_baltic_warnings.txt
             parsed_warnings.json
           retention-days: 7
+          if-no-files-found: ignore
