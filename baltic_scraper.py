@@ -37,11 +37,8 @@ def clean_text(text: str) -> str:
     if not text:
         return ""
     text = html.unescape(text)
-    text = text.replace('
-', '
-').replace('', '
-')
-    text = text.replace(' ', ' ')
+    text = text.replace('\r\n', '\n').replace('\r', '\n')
+    text = text.replace('\xa0', ' ')
     return text.strip()
 
 def _extract_area_name(el) -> str:
