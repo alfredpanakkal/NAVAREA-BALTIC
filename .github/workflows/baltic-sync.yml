@@ -50,7 +50,23 @@ jobs:
 
       - name: Harvest Bulletins (Stage 1 Scraper)
         run: |
-          python baltic_scraper.py
+          set +e
+          python -u navarea_xi_scraper.py 2>&1 | tee scraper_debug.log
+          code=${PIPESTATUS[0]}
+          if [ "$code" -ne 0 ]; then
+            {
+              echo "## ❌ Stage 1 Scraper failed (exit $code) — verbatim log"
+              echo '~~~'
+              cat scraper_debug.log
+              echo '~~~'
+            } >> "$GITHUB_STEP_SUMMARY"
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add scraper_debug.log
+            git commit -m "[skip ci] capture scraper failure debug log (exit $code)"
+            git push || echo "push failed"
+            exit "$code"
+          fi
 
       - name: Normalize & Classify (Stage 2 Parser)
         run: |
@@ -58,11 +74,11 @@ jobs:
 
       - name: Verify Scraper & Parser Output Files
         run: |
-          if [ ! -f navarea_baltic_warnings.txt ]; then
+          if [ ! -f navarea_xi_warnings.txt ]; then
             echo "Scraper error: navarea_baltic_warnings.txt not generated!"
             exit 1
           fi
-          if [ ! -f parsed_warnings.json ]; then
+          if [ ! -f parsed_xi_warnings.json ]; then
             echo "Parser error: parsed_warnings.json not generated!"
             exit 1
           fi
@@ -83,5 +99,6 @@ jobs:
           path: |
             navarea_baltic_warnings.txt
             parsed_warnings.json
+            scraper_debug.log
           retention-days: 7
           if-no-files-found: ignore
