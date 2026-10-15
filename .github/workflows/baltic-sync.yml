@@ -50,23 +50,7 @@ jobs:
 
       - name: Harvest Bulletins (Stage 1 Scraper)
         run: |
-          set +e
-          python -u baltic_scraper.py 2>&1 | tee scraper_debug.log
-          code=${PIPESTATUS[0]}
-          if [ "$code" -ne 0 ]; then
-            {
-              echo "## ❌ Stage 1 Scraper failed (exit $code) — verbatim log"
-              echo '~~~'
-              cat scraper_debug.log
-              echo '~~~'
-            } >> "$GITHUB_STEP_SUMMARY"
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add scraper_debug.log
-            git commit -m "[skip ci] capture scraper failure debug log (exit $code)"
-            git push || echo "push failed"
-            exit "$code"
-          fi
+          python baltic_scraper.py
 
       - name: Normalize & Classify (Stage 2 Parser)
         run: |
@@ -89,7 +73,23 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: |
-          python supabase_sync.py
+          set +e
+          python -u supabase_sync.py 2>&1 | tee sync_debug.log
+          code=${PIPESTATUS[0]}
+          if [ "$code" -ne 0 ]; then
+            {
+              echo "## ❌ Stage 3 Supabase Sync failed (exit $code) — verbatim log"
+              echo '~~~'
+              cat sync_debug.log
+              echo '~~~'
+            } >> "$GITHUB_STEP_SUMMARY"
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add sync_debug.log
+            git commit -m "chore: capture sync_debug.log [skip ci]"
+            git push || echo "push failed"
+            exit "$code"
+          fi
 
       - name: Upload Output Artifacts
         uses: actions/upload-artifact@v4
@@ -99,6 +99,6 @@ jobs:
           path: |
             navarea_baltic_warnings.txt
             parsed_warnings.json
-            scraper_debug.log
+            sync_debug.log
           retention-days: 7
           if-no-files-found: ignore
