@@ -1,4 +1,0 @@
-  File "/home/runner/work/NAVAREA-BALTIC/NAVAREA-BALTIC/baltic_scraper.py", line 40
-    text = text.replace('
-                        ^
-SyntaxError: unterminated string literal (detected at line 40)
