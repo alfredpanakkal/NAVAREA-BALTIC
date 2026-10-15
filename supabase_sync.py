@@ -198,11 +198,10 @@ def sync_to_supabase(json_file="parsed_warnings.json"):
     # [4/4] Apply cancellations for dropped bulletins
     if diff["cancel"]:
         print(f"\n[4/4] Processing {len(diff['cancel'])} cancelled bulletin(s)...")
-        now_iso = datetime.now(timezone.utc).isoformat()
         for wid in diff["cancel"]:
             try:
                 supabase.table("nav_warnings") \
-                    .update({"status": "cancelled", "updated_at": now_iso}) \
+                    .update({"status": "cancelled"}) \
                     .eq("source_id", SOURCE_ID) \
                     .eq("warning_id", wid) \
                     .execute()
